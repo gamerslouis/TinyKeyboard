@@ -13,6 +13,9 @@ namespace TinyKeyboard
         SerialPortDetector serialPortDetector;
         SerialPortMessage serialPortMessage;
 
+        Form1 form;
+        System.Windows.Forms.NotifyIcon notifyIcon;
+
         public CenterControl()
         {
             messageScheduler = new MessageScheduler();
@@ -22,8 +25,8 @@ namespace TinyKeyboard
             profileContainer.Load();
             messageScheduler.ProfileChanged += ProfileChanged;
 
-            messageScheduler.handlers 
-                = MakeHandlers(profileContainer.jSONProfiles[profileContainer.ProfileIndex]); 
+            messageScheduler.handlers
+                = MakeHandlers(profileContainer.jSONProfiles[profileContainer.ProfileIndex]);
 
             ///
             //profileload
@@ -38,12 +41,32 @@ namespace TinyKeyboard
                 }
             }
 
+            notifyIcon.Visible = true;
+            notifyIcon.Text = "TinyKeyboard";
+            notifyIcon.Click += notifyIconClick;
+
+            form.VisibleChanged += Form_VisibleChanged;
+
+        }
+
+        private void Form_VisibleChanged(object sender, EventArgs e)
+        {
+            if (((Form1)sender).Visible == false)
+            {
+                notifyIcon.Visible = true;
+            }
+        }
+
+        private void notifyIconClick(object sender, EventArgs e)
+        {
+            form.Show();
+            notifyIcon.Visible = false;
         }
 
         private void ProfileChanged(object sender, int e)
         {
             e--;
-            if(e<profileContainer.jSONProfiles.Length)
+            if (e < profileContainer.jSONProfiles.Length)
             {
                 profileContainer.ProfileIndex = e;
                 messageScheduler.handlers
