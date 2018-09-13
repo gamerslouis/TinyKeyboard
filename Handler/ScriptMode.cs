@@ -24,7 +24,7 @@ namespace TinyKeyboard.Handler
                 {
                     Process.Start(ScriptPath);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     throw e;
                 }

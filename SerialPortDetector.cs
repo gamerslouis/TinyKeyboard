@@ -45,25 +45,19 @@ namespace TinyKeyboard
 
         private void MonitorDeviceChanges()
         {
-            try
-            {
-                var deviceArrivalQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2");
-                var deviceRemovalQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 3");
 
-                arrival = new ManagementEventWatcher(deviceArrivalQuery);
-                removal = new ManagementEventWatcher(deviceRemovalQuery);
+            var deviceArrivalQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2");
+            var deviceRemovalQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 3");
 
-                arrival.EventArrived += (o, args) => RaisePortsChangedIfNecessary(EventType.Insertion);
-                removal.EventArrived += (sender, eventArgs) => RaisePortsChangedIfNecessary(EventType.Removal);
+            arrival = new ManagementEventWatcher(deviceArrivalQuery);
+            removal = new ManagementEventWatcher(deviceRemovalQuery);
 
-                // Start listening for events
-                arrival.Start();
-                removal.Start();
-            }
-            catch (ManagementException err)
-            {
+            arrival.EventArrived += (o, args) => RaisePortsChangedIfNecessary(EventType.Insertion);
+            removal.EventArrived += (sender, eventArgs) => RaisePortsChangedIfNecessary(EventType.Removal);
 
-            }
+            // Start listening for events
+            arrival.Start();
+            removal.Start();
         }
 
         private void RaisePortsChangedIfNecessary(EventType eventType)

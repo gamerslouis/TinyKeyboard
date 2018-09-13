@@ -15,34 +15,31 @@ namespace TinyKeyboard
 
         public event EventHandler<byte> SerialPortReceived;
 
-        private bool runFlag;
+        private System.Threading.Thread thread;
 
         public SerialPortMessage(SerialPort comport)
         {
             this.comport = comport;
-            this.runFlag = false;
+            thread = new System.Threading.Thread(MainLoop);
+            thread.IsBackground = true;
         }
 
         public void StartRead()
         {
-            runFlag = true;
-            MainLoop();
+            thread.Start();
         }
 
         public void EndRead()
         {
-            runFlag = false;
+            thread.Abort();
         }
 
         private void MainLoop()
         {
-            while(runFlag)
+            if (comport.BytesToRead > 0)
             {
-                if(comport.BytesToRead>0)
-                {
-                    var key = Read();
-                    SerialPortReceived?.Invoke(this, key);
-                }
+                var key = Read();
+                SerialPortReceived?.Invoke(this, key);
             }
         }
 

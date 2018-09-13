@@ -14,10 +14,10 @@ namespace TinyKeyboard
     public class JSONProfileContainer
     {
         public JSONProfile[] jSONProfiles;
-        
+
         public void Check()
         {
-            if (jSONProfiles.Length > GlobalSetting.ProfileMaxNumber) 
+            if (jSONProfiles.Length > GlobalSetting.ProfileMaxNumber)
             {
                 Array.Resize(ref jSONProfiles, GlobalSetting.ProfileMaxNumber);
             }
@@ -38,7 +38,7 @@ namespace TinyKeyboard
 
         public void Check()
         {
-            if(jSONModes.Length!=GlobalSetting.KeyMaxNumber)
+            if (jSONModes.Length != GlobalSetting.KeyMaxNumber)
             {
                 Array.Resize(ref jSONModes, GlobalSetting.KeyMaxNumber);
             }

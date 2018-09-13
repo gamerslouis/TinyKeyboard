@@ -19,7 +19,7 @@ namespace TinyKeyboard.Handler
 
         void IHandler.KeyPress()
         {
-            if(KeyCode!=null)
+            if (KeyCode != null)
             {
                 keybd_event((Keys)KeyCode, 0, 0, 0);
             }
@@ -39,7 +39,7 @@ namespace TinyKeyboard.Handler
             {
                 KeyCode = (Keys)(int.Parse(set));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new InvalidValueException();
             }
@@ -50,4 +50,6 @@ namespace TinyKeyboard.Handler
 
         private const int KEYEVENTF_KEYUP = 2;
     }
+
+    class InvalidValueException : Exception { }
 }

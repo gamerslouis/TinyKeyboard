@@ -14,8 +14,8 @@ namespace TinyKeyboard
 
         public static Mode nullmode;
 
-        public static void AddMode<THandler>(string name,string optionInfo,SettingForm.ISettingForm settingForm) 
-            where THandler : Handler.IHandler,new()
+        public static void AddMode<THandler>(string name, string optionInfo, SettingForm.ISettingForm settingForm)
+            where THandler : Handler.IHandler, new()
         {
             var mode = new Mode();
             mode.Name = name;
@@ -37,7 +37,7 @@ namespace TinyKeyboard
 
         public static Mode Get(string name)
         {
-            foreach(var mode in Modes)
+            foreach (var mode in Modes)
             {
                 if (mode.Name == name) return mode;
             }

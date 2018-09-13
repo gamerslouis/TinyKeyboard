@@ -13,11 +13,11 @@ namespace TinyKeyboard
 
         public event EventHandler<int> ProfileChanged;
 
-        public void ScheduleFuction(object sender,byte key)
+        public void ScheduleFuction(object sender, byte key)
         {
             if (key == 9) { ProfileChangeFlag = true; return; }
 
-            if(ProfileChangeFlag)
+            if (ProfileChangeFlag)
             {
                 if (key < 9 && key > 0)
                 {
@@ -31,7 +31,7 @@ namespace TinyKeyboard
                 {
                     handlers[key].KeyPress();
                 }
-                else if (key > 9 && key <= 17) 
+                else if (key > 9 && key <= 17)
                 {
                     handlers[key - 9].KeyUp();
                 }

@@ -15,9 +15,9 @@ namespace TinyKeyboard
             this.cc = cc;
         }
 
-        public JSONProfile GetCurrentProfile()
+        public JSONProfile GetProfile(int index)
         {
-            return cc.profileContainer.jSONProfiles[cc.profileContainer.ProfileIndex];
+            return cc.profileContainer.jSONProfiles[index];
         }
 
         public int GetCureentIndex()
@@ -35,6 +35,57 @@ namespace TinyKeyboard
             return names;
         }
 
+        public bool ChangeProfileName(int index, string name)
+        {
+            cc.profileContainer.jSONProfiles[index].Name = name;
+            return cc.profileContainer.Save();
+        }
 
+        public bool AddNewProfile(string name)
+        {
+            var profile = new JSONProfile();
+            profile.Check();
+            profile.Name = name;
+            Array.Resize(ref cc.profileContainer.jSONProfiles, cc.profileContainer.jSONProfiles.Length + 1);
+            cc.profileContainer.jSONProfiles[cc.profileContainer.jSONProfiles.Length - 1] = profile;
+            if (!cc.profileContainer.Save())
+            {
+                Array.Resize(ref cc.profileContainer.jSONProfiles, cc.profileContainer.jSONProfiles.Length - 1);
+                return false;
+            }
+            return true;
+        }
+
+        public bool RemoveProfile(int index)
+        {
+            var ErrorProtectProfile = cc.profileContainer.jSONProfiles[index];
+            for (int i = index; i < cc.profileContainer.jSONProfiles.Length - 1; i++)
+            {
+                cc.profileContainer.jSONProfiles[i] = cc.profileContainer.jSONProfiles[i + 1];
+            }
+            Array.Resize(ref cc.profileContainer.jSONProfiles, cc.profileContainer.jSONProfiles.Length - 1);
+
+            if (!cc.profileContainer.Save())
+            {
+                Array.Resize(ref cc.profileContainer.jSONProfiles, cc.profileContainer.jSONProfiles.Length + 1);
+                for (int i = index; i < cc.profileContainer.jSONProfiles.Length - 1; i++)
+                {
+                    cc.profileContainer.jSONProfiles[i + 1] = cc.profileContainer.jSONProfiles[i];
+                }
+                cc.profileContainer.jSONProfiles[index] = ErrorProtectProfile;
+            }
+
+            return true;
+        }
+
+        public void ForceDetectPorts()
+        {
+            if (cc.serialPortMessage != null)
+            {
+                cc.serialPortMessage.Dispose();
+                cc.serialPortMessage = null;
+            }
+            cc.ScanPorts();
+        }
     }
 }

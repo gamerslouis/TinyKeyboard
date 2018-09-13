@@ -38,9 +38,9 @@ namespace TinyKeyboard.SettingForm
 
             switch (form.ShowDialog())
             {
-                case DialogResult.OK:return value.ToString();
-                case DialogResult.Cancel:return "cancel";
-                default:return "cancel";
+                case DialogResult.OK: return value.ToString();
+                case DialogResult.Cancel: return "cancel";
+                default: return "cancel";
             }
         }
     }
