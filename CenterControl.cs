@@ -8,7 +8,7 @@ namespace TinyKeyboard
 {
     class CenterControl
     {
-        ProfileContainer profileContainer;
+        public ProfileContainer profileContainer;
         MessageScheduler messageScheduler;
         SerialPortDetector serialPortDetector;
         SerialPortMessage serialPortMessage;
@@ -118,8 +118,5 @@ namespace TinyKeyboard
             }
             return handlers;
         }
-
-        //ui,notify init
-        //ui profile set commu
     }
 }

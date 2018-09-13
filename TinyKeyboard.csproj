@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CenterControl.cs" />
+    <Compile Include="CenterControlGUIMessage.cs" />
     <Compile Include="GlobalSetting.cs" />
     <Compile Include="Handler\InvalidValueException.cs" />
     <Compile Include="Handler\NullMode.cs" />
