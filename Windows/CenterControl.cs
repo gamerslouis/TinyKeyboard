@@ -8,97 +8,89 @@ namespace TinyKeyboard
 {
     class CenterControl
     {
-        public ProfileContainer profileContainer;
-        MessageScheduler messageScheduler;
-        SerialPortDetector serialPortDetector;
-        public SerialPortMessage serialPortMessage { get; set; }
+        public ProfileContainer profileContainer = new ProfileContainer();
+        private MessageScheduler messageScheduler = new MessageScheduler();
+        private SerialPortDetector serialPortDetector = new SerialPortDetector();
+        public SerialPortMessageReceiver serialPortMessage { get; set; }
 
-        Form1 form;
-        System.Windows.Forms.NotifyIcon notifyIcon;
+        public Form1 form;
 
         public CenterControl()
         {
-            messageScheduler = new MessageScheduler();
-            serialPortDetector = new SerialPortDetector();
-            profileContainer = new ProfileContainer();
+            form = new Form1(new CenterControlGUIMessage(this));
 
-            if (!profileContainer.Load())
+            if(!System.IO.File.Exists(GlobalSetting.ProfileLocation))
+            {
+                profileContainer.Create();
+                if(!profileContainer.Save())
+                {
+                    System.Windows.Forms.MessageBox.Show("錯誤"
+                    , "重建" + GlobalSetting.ProfileLocation + "失敗"
+                    , System.Windows.Forms.MessageBoxButtons.OK
+                    , System.Windows.Forms.MessageBoxIcon.Error);
+                    throw new CannotUnloadAppDomainException();
+                }
+            }
+
+            else if (!profileContainer.Load())
             {
                 System.Windows.Forms.MessageBox.Show("錯誤"
-                    , "無法開啟或重建" + GlobalSetting.ProfileLocation
+                    , GlobalSetting.ProfileLocation + "無法開啟或失敗"
                     , System.Windows.Forms.MessageBoxButtons.OK
                     , System.Windows.Forms.MessageBoxIcon.Error);
                 throw new CannotUnloadAppDomainException();
             }
 
             serialPortDetector.PortsChanged += PortsChanged;
-            form.VisibleChanged += Form_VisibleChanged;
             messageScheduler.ProfileChanged += ProfileChanged;
 
+            // Apply the default profile in the profile file
             messageScheduler.handlers
-                = MakeHandlers(profileContainer.jSONProfiles[profileContainer.ProfileIndex]);
+                = MakeHandlers(profileContainer.jSONProfiles[profileContainer.CurrentProfileIndex]);
 
-            ScanPorts();
-
-            notifyIcon.Visible = true;
-            notifyIcon.Text = "TinyKeyboard";
-            notifyIcon.Click += notifyIconClick;
-            var cms = new System.Windows.Forms.MenuItem[1];
-            cms[1] = new System.Windows.Forms.MenuItem("Exit", (sender, e) =>
-             {
-                 System.Windows.Forms.Application.Exit();
-             });
-            notifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu(cms);
-
-
-        }
-
-        //Show notify when form closed
-        private void Form_VisibleChanged(object sender, EventArgs e)
-        {
-            if (((Form1)sender).Visible == false)
+            // Check if the device have connected before application start
+            var truePortName = ScanPorts();
+            if(truePortName !="")
             {
-                notifyIcon.Visible = true;
+                SetSerialPortMessage(truePortName);
             }
-        }
-
-        //Show form and hide notify when notify clicked
-        private void notifyIconClick(object sender, EventArgs e)
-        {
-            form.Show();
-            notifyIcon.Visible = false;
         }
 
         //Trigger when user change Profile on Keyboard
         private void ProfileChanged(object sender, int e)
         {
-            e--;
             if (e < profileContainer.jSONProfiles.Length)
             {
-                profileContainer.ProfileIndex = e;
+                profileContainer.CurrentProfileIndex = e;
                 messageScheduler.handlers
-                = MakeHandlers(profileContainer.jSONProfiles[profileContainer.ProfileIndex]);
+                = MakeHandlers(profileContainer.jSONProfiles[profileContainer.CurrentProfileIndex]);
             }
         }
 
-        //Check If KeyBoard is Online,init serialMessage
-        public void ScanPorts()
+        public void reloadProfile()
         {
-            foreach (var port in serialPortDetector._serialPorts)
+            ProfileChanged(null, profileContainer.CurrentProfileIndex);
+        }
+
+        //Check If KeyBoard is Online,init serialMessage
+        public string ScanPorts()
+        {
+            foreach (var portName in serialPortDetector.GetAvailableSerialPortNames())
             {
-                if (port == GlobalSetting.ArduinoName)
+                if (portName == GlobalSetting.ArduinoName)
                 {
-                    SetSerialPortMessage(port);
+                    return portName;
                 }
             }
+            return "";
         }
 
         //Use COM name to init SerialPortMessageObject and Start Listen
         private void SetSerialPortMessage(string port)
         {
             if (serialPortMessage != null) serialPortMessage.Dispose();
-            serialPortMessage = new SerialPortMessage(new System.IO.Ports.SerialPort(port));
-            serialPortMessage.SerialPortReceived += messageScheduler.ScheduleFuction;
+            serialPortMessage = new SerialPortMessageReceiver(new System.IO.Ports.SerialPort(port));
+            serialPortMessage.SerialPortMessageReceived += messageScheduler.ScheduleFuction;
             serialPortMessage.StartRead();
         }
 
@@ -116,7 +108,7 @@ namespace TinyKeyboard
             {
                 serialPortMessage.EndRead();
                 var foundFlag = false;
-                foreach (var port in e.SerialPorts)
+                foreach (var port in e.SerialPortNames)
                 {
                     if (port == serialPortMessage.name)
                     {
@@ -143,7 +135,8 @@ namespace TinyKeyboard
             Handler.IHandler[] handlers = new Handler.IHandler[GlobalSetting.KeyMaxNumber];
             for (int i = 0; i < handlers.Length; i++)
             {
-                handlers[i] = ModeFactory.Get(profile.jSONModes[i].Name).CreateHanlder(profile.jSONModes[i].Set);
+                var x = ModeFactory.Get(profile.jSONModes[i].Name);
+                handlers[i] = x.CreateHanlder(profile.jSONModes[i].Set);
             }
             return handlers;
         }

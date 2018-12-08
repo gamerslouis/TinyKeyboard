@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TinyKeyboard.Handler
 {
-    class NullMode : IHandler
+    class NullModeHandler : IHandler
     {
         void IHandler.KeyPress()
         {

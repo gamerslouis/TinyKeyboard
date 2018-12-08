@@ -22,9 +22,9 @@ void loop()
     if(stat != button_state[i])
     {
       if(stat)
-        Serial.print(i+1);
+        Serial.print((char)(i+1));
       else if(i != BUTTON_COUNT-1)
-        Serial.print(i+BUTTON_COUNT);
+        Serial.print((char)(i+BUTTON_COUNT+1));
       button_state[i] = stat;
     }
   }

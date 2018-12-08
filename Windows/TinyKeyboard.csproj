@@ -52,19 +52,19 @@
   <ItemGroup>
     <Compile Include="CenterControl.cs" />
     <Compile Include="CenterControlGUIMessage.cs" />
-    <Compile Include="GlobalSetting.cs" />
-    <Compile Include="Handler\NullMode.cs" />
-    <Compile Include="JSONProfiles.cs" />
+    <Compile Include="Configs\GlobalSetting.cs" />
+    <Compile Include="Handler\NullModeHandler.cs" />
+    <Compile Include="Configs\JSONProfiles.cs" />
     <Compile Include="MessageScheduler.cs" />
     <Compile Include="Mode\IMode.cs" />
     <Compile Include="Handler\IHandler.cs" />
     <Compile Include="Mode\ModeFactory.cs" />
-    <Compile Include="Profile.cs" />
+    <Compile Include="Configs\ProfileContainer.cs" />
     <Compile Include="SettingForm\ISettingForm.cs" />
-    <Compile Include="Handler\KeySimulatorMode.cs" />
-    <Compile Include="Handler\ScriptMode.cs" />
-    <Compile Include="SerialPortMessage.cs" />
-    <Compile Include="SerialPortDetector.cs" />
+    <Compile Include="Handler\KeySimulatorModeHandler.cs" />
+    <Compile Include="Handler\ScriptModeHandler.cs" />
+    <Compile Include="Serial\SerialPortMessageReceiver.cs" />
+    <Compile Include="Serial\SerialPortDetector.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

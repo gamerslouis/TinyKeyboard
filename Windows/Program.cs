@@ -14,21 +14,14 @@ namespace TinyKeyboard
         [STAThread]
         static void Main()
         {
-            CenterControl cc;
-            try
-            {
-                cc = new CenterControl();
-            }
-            catch
-            {
-                return;
-            }
-
-            Form1 Form1 = new Form1(new CenterControlGUIMessage(cc));
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run();
+
+            CenterControl centerControl;
+        
+            centerControl = new CenterControl();
+            
+            Application.Run(centerControl.form);
         }
     }
 }

@@ -7,46 +7,73 @@ using System.IO.Ports;
 
 namespace TinyKeyboard
 {
-    class SerialPortMessage : IDisposable
+    class SerialPortMessageReceiver : IDisposable
     {
         private SerialPort comport;
 
+        // Serial port name
         public string name { get { return comport.PortName; } }
 
-        public event EventHandler<byte> SerialPortReceived;
+        public event EventHandler<byte> SerialPortMessageReceived;
 
+        public Exception lastError;
+
+        // Thread for Mainloop to listen to port message
         private System.Threading.Thread thread;
 
-        public SerialPortMessage(SerialPort comport)
+        public SerialPortMessageReceiver(SerialPort comport)
         {
             this.comport = comport;
             thread = new System.Threading.Thread(MainLoop);
             thread.IsBackground = true;
         }
 
-        public void StartRead()
+        public bool StartRead()
         {
-            thread.Start();
+            try
+            {
+                if (!comport.IsOpen)
+                {
+                    comport.Open();
+                }
+                thread.Start();
+                return true;
+            }
+            catch (Exception e)
+            {
+                this.lastError = e;
+                return false;
+            }
+
         }
 
         public void EndRead()
         {
+            if (comport.IsOpen)
+            {
+                comport.Close();
+            }
             thread.Abort();
         }
 
         private void MainLoop()
         {
-            if (comport.BytesToRead > 0)
+            while (true)
             {
-                var key = Read();
-                SerialPortReceived?.Invoke(this, key);
+                if (comport.BytesToRead > 0)
+                {
+                    var key = ReadMessage();
+                    SerialPortMessageReceived?.Invoke(this, key);
+                }
+                else System.Threading.Thread.Sleep(10);
             }
         }
 
-        private byte Read()
+        private byte ReadMessage()
         {
             byte[] buffer = new byte[1];
             comport.Read(buffer, 0, buffer.Length);
+            System.Diagnostics.Debug.WriteLine(buffer[0].ToString());
             return buffer[0];
         }
 
@@ -60,7 +87,7 @@ namespace TinyKeyboard
                 if (disposing)
                 {
                     comport.Close();
-                    SerialPortReceived = null;
+                    SerialPortMessageReceived = null;
                     // TODO: 處置受控狀態 (受控物件)。
                 }
 

@@ -8,7 +8,7 @@ namespace TinyKeyboard
 {
     class ProfileContainer
     {
-        public int ProfileIndex;
+        public int CurrentProfileIndex;
         public JSONProfile[] jSONProfiles;
 
         public bool Load()
@@ -21,11 +21,11 @@ namespace TinyKeyboard
                 root.jSONProfileContainer.Check();
                 jSONProfiles = root.jSONProfileContainer.jSONProfiles;
 
-                if (ProfileIndex < jSONProfiles.Length && ProfileIndex >= 0)
+                if (CurrentProfileIndex < jSONProfiles.Length && CurrentProfileIndex >= 0)
                 {
-                    ProfileIndex = root.profileIndex;
+                    CurrentProfileIndex = root.profileIndex;
                 }
-                else ProfileIndex = 0;
+                else CurrentProfileIndex = 0;
 
                 if (jSONProfiles.Length == 0)
                 {
@@ -44,9 +44,14 @@ namespace TinyKeyboard
         {
             try
             {
-                JSONRoot root = new JSONRoot();
-                root.profileIndex = ProfileIndex;
-                root.jSONProfileContainer.jSONProfiles = jSONProfiles;
+                JSONRoot root = new JSONRoot
+                {
+                    profileIndex = CurrentProfileIndex,
+                    jSONProfileContainer = new JSONProfileContainer
+                    {
+                        jSONProfiles = jSONProfiles
+                    }
+                };
                 string t = Newtonsoft.Json.JsonConvert.SerializeObject(root);
                 var sw = new System.IO.StreamWriter(GlobalSetting.ProfileLocation + ".tmp");
                 sw.Write(t);
@@ -76,6 +81,13 @@ namespace TinyKeyboard
                 return false;
             }
             return true;
+        }
+
+        public void Create()
+        {
+            CurrentProfileIndex = 0;
+            jSONProfiles = new JSONProfile[1];
+            jSONProfiles[0] = new JSONProfile();
         }
     }
 

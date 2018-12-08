@@ -22,18 +22,18 @@ namespace TinyKeyboard
                 if (key < 9 && key > 0)
                 {
                     ProfileChangeFlag = false;
-                    ProfileChanged?.Invoke(this, key);
+                    ProfileChanged?.Invoke(this, key-1);
                 }
             }
             else
             {
                 if (key < 9 && key > 0)
                 {
-                    handlers[key].KeyPress();
+                    handlers[key-1].KeyUp();
                 }
                 else if (key > 9 && key <= 17)
                 {
-                    handlers[key - 9].KeyUp();
+                    handlers[key - 9-1].KeyPress();
                 }
             }
         }

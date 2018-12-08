@@ -17,12 +17,13 @@ namespace TinyKeyboard
 
         public JSONProfile GetProfile(int index)
         {
+            if (index == -1) return cc.profileContainer.jSONProfiles[0];
             return cc.profileContainer.jSONProfiles[index];
         }
 
         public int GetCureentIndex()
         {
-            return cc.profileContainer.ProfileIndex;
+            return cc.profileContainer.CurrentProfileIndex;
         }
 
         public string[] GetProfileNames()
@@ -39,6 +40,25 @@ namespace TinyKeyboard
         {
             cc.profileContainer.jSONProfiles[index].Name = name;
             return cc.profileContainer.Save();
+        }
+
+        public bool ChangeProfileMode(int profileIndex,int modeIndex,string name,string set)
+        {
+            try
+            {
+                cc.profileContainer.jSONProfiles[profileIndex].jSONModes[modeIndex].Name = name;
+                cc.profileContainer.jSONProfiles[profileIndex].jSONModes[modeIndex].Set = set;
+                cc.profileContainer.Save();
+                if(profileIndex == GetCureentIndex())
+                {
+                    cc.reloadProfile();
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
         }
 
         public bool AddNewProfile(string name)

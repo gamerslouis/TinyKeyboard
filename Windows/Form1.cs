@@ -13,22 +13,55 @@ namespace TinyKeyboard
     partial class Form1 : Form
     {
         private CenterControlGUIMessage ccmsg;
-        private ModeContainer[] modeContainers = new ModeContainer[GlobalSetting.KeyMaxNumber];
+        private ModeContainer[] modeContainers;
+        private NotifyIcon notifyIcon;
 
         public Form1(CenterControlGUIMessage ccmsg)
         {
             InitializeComponent();
             this.ccmsg = ccmsg;
+
+            // Notify Icon init 
+            notifyIcon = new NotifyIcon();
+            modeContainers = new ModeContainer[GlobalSetting.KeyMaxNumber];
+            for(int i = 0;i< modeContainers.Length;i++)
+            {
+                
+                modeContainers[i] = new ModeContainer(150,30+40*i);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
+            notifyIcon.Visible = true;
+            notifyIcon.Text = "TinyKeyboard";
+
+            notifyIcon.Click += notifyIconClick;
+            var cms = new System.Windows.Forms.MenuItem[1];
+            cms[0] = new System.Windows.Forms.MenuItem("Exit", (a,b) =>
+            {
+                System.Windows.Forms.Application.Exit();
+            });
+            notifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu(cms);
+            notifyIcon.BalloonTipText = "TinyKeyboard";
+            notifyIcon.ShowBalloonTip(1000);
+
             foreach (var container in modeContainers)
             {
                 container.AppendTo(this);
             }
+
+            ReloadListBox();
+            ShowProfile(0);
         }
 
+        //Show form and hide notify when notify clicked
+        private void notifyIconClick(object sender, EventArgs e)
+        {
+            Show();
+            notifyIcon.Visible = false;
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -112,15 +145,57 @@ namespace TinyKeyboard
             var profile = ccmsg.GetProfile(index);
             for (int i = 0; i < GlobalSetting.KeyMaxNumber; i++)
             {
+                modeContainers[i].Clean();
                 modeContainers[i].SetInfoText.Text = profile.jSONModes[i].Set;
                 modeContainers[i].ModeComboBox.Items.Clear();
                 foreach (var mode in ModeFactory.Modes)
                 {
                     modeContainers[i].ModeComboBox.Items.Add(mode.OptionInfo);
-                    if (mode.Name == profile.jSONModes[i].Name) modeContainers[i].ModeComboBox.SelectedIndex = i;
+                    if (mode.Name == profile.jSONModes[i].Name) modeContainers[i].ModeComboBox.SelectedIndex = modeContainers[i].ModeComboBox.Items.Count-1;
                 }
+
+                int lambdaIndex = index, lambdaI = i;
+
+                modeContainers[i].SetButton.Click += (object sender, EventArgs e) =>
+                {
+                    string newSet = ModeFactory.Get(profile.jSONModes[lambdaI].Name).SettingForm.GetSet();
+                    if (newSet != "cancel")
+                    {
+                        if (!ccmsg.ChangeProfileMode(lambdaIndex, lambdaI, profile.jSONModes[lambdaI].Name, newSet))
+                        {
+                            MessageBox.Show("設定檔變更失敗");
+                        }
+                        else
+                        {
+                            modeContainers[lambdaI].SetInfoText.Text = newSet;
+                        }
+                    }
+                    
+                };
+
+                modeContainers[i].ModeComboBox.TextChanged += (object sender, EventArgs e) =>
+                 {
+                     string newSet = ModeFactory.GetByOptionInfo(modeContainers[lambdaI].ModeComboBox.Text).SettingForm.GetSet();
+                     if (newSet != "cancel")
+                     {
+                         if (!ccmsg.ChangeProfileMode(lambdaIndex, lambdaI, ModeFactory.GetByOptionInfo(modeContainers[lambdaI].ModeComboBox.Text).Name, newSet))
+                         {
+                             MessageBox.Show("設定檔變更失敗");
+                             ShowProfile(lambdaIndex);
+                         }
+                         else
+                         {
+                             modeContainers[lambdaI].SetInfoText.Text = newSet;
+                         }
+                     }
+                     else
+                     {
+                         ShowProfile(lambdaIndex);
+                     }
+                 };
             }
         }
+
 
         private void listBox1_DoubleClick(object sender, EventArgs e)
         {
@@ -169,20 +244,32 @@ namespace TinyKeyboard
             ReloadListBox();
             listBox1.SelectedIndex = i;
         }
+
+        private void Form1_VisibleChanged(object sender, EventArgs e)
+        {
+            if (!((Form1)sender).Visible)
+            {
+                notifyIcon.Visible = true;
+            }
+        }
     }
 
     public class ModeContainer
     {
-        Button SetButton;
+        public Button SetButton;
         public ComboBox ModeComboBox;
         public TextBox SetInfoText;
 
         public ModeContainer(int x, int y)
         {
+            SetButton = new Button();
             SetButton.SetBounds(x, y, 25, 25);
 
+            ModeComboBox = new ComboBox();
             ModeComboBox.SetBounds(x + 27, y, 180, 23);
 
+            SetInfoText = new TextBox();
+            SetInfoText.Enabled = false;
             SetInfoText.SetBounds(x + 210, y, 200, 25);
         }
 
@@ -190,6 +277,15 @@ namespace TinyKeyboard
         {
             Control[] x = { SetButton, ModeComboBox, SetInfoText };
             form.Controls.AddRange(x);
+        }
+
+        public void Clean()
+        {
+            var c = new ComboBox();
+            c.Bounds = ModeComboBox.Bounds;
+            ModeComboBox.FindForm().Controls.Add(c);
+            ModeComboBox.Dispose();
+            ModeComboBox = c;
         }
     }
 }

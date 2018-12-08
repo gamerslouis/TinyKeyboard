@@ -9,7 +9,7 @@ namespace TinyKeyboard
     public class Mode
     {
         public delegate Handler.IHandler CreateHanlderDelegate(string set);
-        public Handler.IHandler CreateHanlderT<THandler>(string set) where THandler : Handler.IHandler, new()
+        public static Handler.IHandler CreateHanlderT<THandler>(string set) where THandler : Handler.IHandler, new()
         {
             Handler.IHandler h = new THandler();
             h.Set(set);

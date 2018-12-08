@@ -10,7 +10,7 @@ namespace TinyKeyboard
 {
     class SerialPortDetector
     {
-        public string[] _serialPorts { get; protected set; }
+        private string[] _serialPortNames;
 
         private ManagementEventWatcher arrival;
 
@@ -18,8 +18,8 @@ namespace TinyKeyboard
 
         public SerialPortDetector()
         {
-            _serialPorts = GetAvailableSerialPorts();
-            MonitorDeviceChanges();
+            _serialPortNames = GetAvailableSerialPortNames();
+            DeviceChangesMonitorInit();
         }
 
         /// <summary>
@@ -35,15 +35,30 @@ namespace TinyKeyboard
         ///     at System.Management.ManagementEventWatcher.Finalize()
         ///InnerException: 
         /// </summary>
-        public void CleanUp()
+        
+        // Start linsten to port change event  
+        public void Start()
+        {
+            arrival.Start();
+            removal.Start();
+        }
+
+        // Stop linsten to port change event
+        public void Stop()
         {
             arrival.Stop();
             removal.Stop();
         }
 
+        // Event Handlers for port change evnet
         public event EventHandler<PortsChangedArgs> PortsChanged;
 
-        private void MonitorDeviceChanges()
+        public string[] GetAvailableSerialPortNames()
+        {
+            return SerialPort.GetPortNames();
+        }
+
+        private void DeviceChangesMonitorInit()
         {
 
             var deviceArrivalQuery = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2");
@@ -54,47 +69,38 @@ namespace TinyKeyboard
 
             arrival.EventArrived += (o, args) => RaisePortsChangedIfNecessary(EventType.Insertion);
             removal.EventArrived += (sender, eventArgs) => RaisePortsChangedIfNecessary(EventType.Removal);
-
-            // Start listening for events
-            arrival.Start();
-            removal.Start();
         }
 
         private void RaisePortsChangedIfNecessary(EventType eventType)
         {
-            lock (_serialPorts)
+            lock (_serialPortNames)
             {
-                var availableSerialPorts = GetAvailableSerialPorts();
-                if (!_serialPorts.SequenceEqual(availableSerialPorts))
+                var availableSerialPorts = GetAvailableSerialPortNames();
+                if (!_serialPortNames.SequenceEqual(availableSerialPorts))
                 {
-                    _serialPorts = availableSerialPorts;
-                    PortsChanged?.Invoke(this, new PortsChangedArgs(eventType, _serialPorts));
+                    _serialPortNames = availableSerialPorts;
+                    PortsChanged?.Invoke(this, new PortsChangedArgs(eventType, _serialPortNames));
                 }
             }
-        }
-
-        public string[] GetAvailableSerialPorts()
-        {
-            return SerialPort.GetPortNames();
         }
     }
 }
 
 public enum EventType
 {
-    Insertion,
-    Removal,
+    Insertion, // Connect to pc
+    Removal, // Remove from pc
 }
 
 public class PortsChangedArgs : EventArgs
 {
-    public PortsChangedArgs(EventType eventType, string[] serialPorts)
+    public PortsChangedArgs(EventType eventType, string[] serialPortNames)
     {
         EventType = eventType;
-        SerialPorts = serialPorts;
+        SerialPortNames = serialPortNames;
     }
 
-    public string[] SerialPorts { get; }
+    public string[] SerialPortNames { get; }
 
     public EventType EventType { get; }
 }

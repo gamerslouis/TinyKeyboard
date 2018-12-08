@@ -7,11 +7,11 @@ using System.Diagnostics;
 
 namespace TinyKeyboard.Handler
 {
-    class ScriptMode : IHandler
+    class ScriptModeHandler : IHandler
     {
         public string ScriptPath;
 
-        public ScriptMode()
+        public ScriptModeHandler()
         {
             ScriptPath = "";
         }

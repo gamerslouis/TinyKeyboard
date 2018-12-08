@@ -36,6 +36,16 @@ namespace TinyKeyboard
         public string Name { get; set; }
         public JSONMode[] jSONModes;
 
+        public JSONProfile()
+        {
+            Name = "預設";
+            jSONModes = new JSONMode[GlobalSetting.KeyMaxNumber];
+            for(int i = 0;i< jSONModes.Length; i++)
+            {
+                jSONModes[i] = new JSONMode();
+            }
+        }
+
         public void Check()
         {
             if (jSONModes.Length != GlobalSetting.KeyMaxNumber)
@@ -44,7 +54,11 @@ namespace TinyKeyboard
             }
             for (int i = 0; i < jSONModes.Length; i++)
             {
-                if (jSONModes[i].Name == "") jSONModes[i].Name = "nullmode";
+                if (jSONModes[i] == null)
+                {
+                    jSONModes[i] = new JSONMode();
+                    if (jSONModes[i].Name == "") jSONModes[i].Name = "nullmode";
+                }
             }
         }
     }
@@ -53,5 +67,11 @@ namespace TinyKeyboard
     {
         public string Name { get; set; }
         public string Set { get; set; }
+
+        public JSONMode()
+        {
+            Name = "nullmode";
+            Set = "";
+        }
     }
 }

@@ -11,6 +11,6 @@ namespace TinyKeyboard
         public static int KeyMaxNumber = 8;
         public static int ProfileMaxNumber = 8;
         public static string ProfileLocation = "profiles.json";
-        public static string ArduinoName = "XX";
+        public static string ArduinoName = "COM3";
     }
 }

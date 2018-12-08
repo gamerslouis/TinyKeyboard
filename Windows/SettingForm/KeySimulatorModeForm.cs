@@ -20,15 +20,16 @@ namespace TinyKeyboard.SettingForm
 
             buttonCancel.Text = "取消";
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.SetBounds(2, 2, 98, 48);
+            buttonCancel.SetBounds(2, 2, 98, 28);
 
-            form.Size = new System.Drawing.Size(100, 50);
+            form.Size = new System.Drawing.Size(200, 70);
             form.FormBorderStyle = FormBorderStyle.FixedDialog;
             form.StartPosition = FormStartPosition.CenterScreen;
             form.MinimizeBox = false;
             form.MaximizeBox = false;
             form.Controls.Add(buttonCancel);
             form.CancelButton = buttonCancel;
+            form.KeyPreview = true;
 
             form.KeyDown += (object sender, KeyEventArgs e) =>
             {

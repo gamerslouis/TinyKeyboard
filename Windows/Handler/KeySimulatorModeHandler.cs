@@ -8,11 +8,11 @@ using System.Windows.Forms;
 
 namespace TinyKeyboard.Handler
 {
-    class KeySimulatorMode : IHandler
+    class KeySimulatorModeHandler : IHandler
     {
         private Keys? KeyCode;
 
-        public KeySimulatorMode()
+        public KeySimulatorModeHandler()
         {
             KeyCode = null;
         }
